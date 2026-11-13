@@ -5,7 +5,7 @@
 	"texture_size": [64, 64],
 	"textures": {
 		"6": "artisan_machines:block/deluxe_worm_farm_harvestable",
-		"particle": "artisan_machines:block/deluxe_worm_farm_harvestable"
+		"particle": "artisan_machines:block/deluxe_worm_farm_particle"
 	},
 	"elements": [
 		{

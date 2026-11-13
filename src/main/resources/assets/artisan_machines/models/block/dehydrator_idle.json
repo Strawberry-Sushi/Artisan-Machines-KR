@@ -6,7 +6,7 @@
 	"texture_size": [64, 64],
 	"textures": {
 		"0": "artisan_machines:block/dehydrator_idle",
-		"particle": "artisan_machines:block/dehydrator_idle"
+		"particle": "artisan_machines:block/dehydrator_particle"
 	},
 	"elements": [
 		{

@@ -131,10 +131,9 @@ public class DGArtisanDataMapsProvider extends DataMapProvider
 
 
         //Stone Hand - Preserves Jar
-        itemUpgrades.add(ArtisanItems.ENKEPHALIN,
+        itemUpgrades.add(ArtisanItems.STONE_HAND,
                 new MachineUpgrade(
-                        ArtisanBlockEntities.PRESERVES_JAR.get(),
-                        new EmptyUpgrade()
+                        ArtisanBlockEntities.PRESERVES_JAR.get()
                 ),
                 false);
 

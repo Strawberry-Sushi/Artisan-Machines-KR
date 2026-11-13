@@ -2,13 +2,12 @@ package com.wdiscute.artisan.registry;
 
 import com.wdiscute.artisan.Artisan;
 import net.mcexpanded.fancytabsections.FancyTabSections;
+import net.mcexpanded.fancytabsections.Section.SectionColored;
 import net.mcexpanded.fancytabsections.creativetab.ConglomerateOfItems;
-import net.mcexpanded.fancytabsections.creativetab.SectionColored;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
 

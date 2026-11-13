@@ -5,7 +5,7 @@
 	"texture_size": [64, 64],
 	"textures": {
 		"11": "artisan_machines:block/loom_harvestable",
-		"particle": "artisan_machines:block/loom_harvestable"
+		"particle": "artisan_machines:block/loom_particle"
 	},
 	"elements": [
 		{

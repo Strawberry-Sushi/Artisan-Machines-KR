@@ -4,7 +4,7 @@
 	"render_type": "cutout_mipped",
 	"textures": {
 		"3": "artisan_machines:block/deluxe_worm_farm_idle",
-		"particle": "artisan_machines:block/deluxe_worm_farm_idle"
+		"particle": "artisan_machines:block/deluxe_worm_farm_particle"
 	},
 	"elements": [
 		{

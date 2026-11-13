@@ -4,7 +4,7 @@
 	"render_type": "cutout_mipped",
 	"textures": {
 		"3": "artisan_machines:block/preserves_jar_idle",
-		"particle": "artisan_machines:block/preserves_jar_idle"
+		"particle": "artisan_machines:block/preserves_jar_particle"
 	},
 	"elements": [
 		{

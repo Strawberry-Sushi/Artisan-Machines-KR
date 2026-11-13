@@ -5,7 +5,7 @@
 	"texture_size": [64, 64],
 	"textures": {
 		"6": "artisan_machines:block/preserves_jar_working",
-		"particle": "artisan_machines:block/preserves_jar_working"
+		"particle": "artisan_machines:block/preserves_jar_particle"
 	},
 	"elements": [
 		{

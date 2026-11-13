@@ -67,6 +67,6 @@ public class AddAllToResultUpgrade extends AbstractUpgrade
     @Override
     public DeferredHolder<AbstractUpgrade, ? extends AbstractUpgrade> getRegistryHolder()
     {
-        return ArtisanUpgrades.ADD_RANDOM_TO_RESULT;
+        return ArtisanUpgrades.ADD_ALL_TO_RESULT;
     }
 }

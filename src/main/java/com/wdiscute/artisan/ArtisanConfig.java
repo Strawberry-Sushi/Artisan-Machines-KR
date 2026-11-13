@@ -6,6 +6,16 @@ public class ArtisanConfig
 {
     private static final ModConfigSpec.Builder BUILDER_CLIENT = new ModConfigSpec.Builder();
 
+    public static final ModConfigSpec.DoubleValue BOB_AMOUNT = BUILDER_CLIENT
+            .comment("Controls much machines bob whilst working")
+            .translation("artisan_machines.configuration.bob")
+            .defineInRange("bob", 0.4d, 0d, 99d);
+
+    public static final ModConfigSpec.DoubleValue BOB_AMOUNT_UPGRADED = BUILDER_CLIENT
+            .comment("Controls much upgraded machines bob whilst working")
+            .translation("artisan_machines.configuration.bob_upgrade")
+            .defineInRange("bob_upgrade", 0.4d, 0d, 99d);
+
     static final ModConfigSpec SPEC = BUILDER_CLIENT.build();
 
 

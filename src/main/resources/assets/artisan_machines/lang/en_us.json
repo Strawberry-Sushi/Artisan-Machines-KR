@@ -3,6 +3,8 @@
   "creativetab.artisan_machines.artisan_machines.machines": "Machines",
   "creativetab.artisan_machines.artisan_machines.upgrades": "Upgrades",
 
+  "artisan_machines.configuration.bob" : "Machine Bob Multiplier",
+  "artisan_machines.configuration.bob_upgrade" : "Upgraded Machine Bob Multiplier",
   "artisan_machines.configuration.tick_delay" : "Tick Delay",
 
   "block.artisan_machines.machine.currently_making": "Currently Making: ",

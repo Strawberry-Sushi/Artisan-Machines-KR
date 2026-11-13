@@ -11,6 +11,7 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
@@ -75,6 +76,63 @@ public abstract class AbstractArtisanRecipe implements Recipe<ArtisanRecipeInput
         NonNullList<Ingredient> nonnulllist = NonNullList.create();
         nonnulllist.addAll(List.copyOf(this.ingredients));
         return nonnulllist;
+    }
+
+    public boolean hasBlacklistedUpgrade(List<ItemStack> upgrades)
+    {
+        if (blacklistedUpgrades.isEmpty()) return false;
+
+        for (ItemStack stack : upgrades)
+        {
+            if (stack.isEmpty()) continue;
+
+            for (Ingredient banned : blacklistedUpgrades)
+            {
+                if (banned.test(stack)) return true;
+            }
+        }
+        return false;
+    }
+
+    //Kuhn’s augmenting-path algorithm
+    public boolean upgradesMatches(List<ItemStack> upgrades)
+    {
+        List<Ingredient> required = requiresUpgrade;
+
+        if (required.isEmpty()) return true;
+        if (upgrades.size() < required.size()) return false;
+
+        int[] stackOwner = new int[upgrades.size()];
+        Arrays.fill(stackOwner, -1);
+
+        for (int i = 0; i < required.size(); i++)
+            if (!tryAssign(required, upgrades, i, stackOwner, new boolean[upgrades.size()]))
+                return false;
+
+        return true;
+    }
+
+    private static boolean tryAssign(List<Ingredient> required, List<ItemStack> stacks, int ingredientIdx,
+                                     int[] stackOwner, boolean[] visited)
+    {
+        Ingredient ingredient = required.get(ingredientIdx);
+
+        for (int s = 0; s < stacks.size(); s++)
+        {
+            if (visited[s]) continue;
+
+            ItemStack stack = stacks.get(s);
+            if (stack.isEmpty() || !ingredient.test(stack)) continue;
+
+            visited[s] = true;
+
+            if (stackOwner[s] == -1 || tryAssign(required, stacks, stackOwner[s], stackOwner, visited))
+            {
+                stackOwner[s] = ingredientIdx;
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

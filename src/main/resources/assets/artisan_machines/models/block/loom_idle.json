@@ -5,7 +5,7 @@
 	"texture_size": [64, 64],
 	"textures": {
 		"7": "artisan_machines:block/loom_idle",
-		"particle": "artisan_machines:block/loom_idle"
+		"particle": "artisan_machines:block/loom_particle"
 	},
 	"elements": [
 		{

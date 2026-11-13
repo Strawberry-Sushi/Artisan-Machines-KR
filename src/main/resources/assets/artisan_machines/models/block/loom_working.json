@@ -5,7 +5,7 @@
 	"texture_size": [64, 64],
 	"textures": {
 		"10": "artisan_machines:block/loom_working",
-		"particle": "artisan_machines:block/loom_working"
+		"particle": "artisan_machines:block/loom_particle"
 	},
 	"elements": [
 		{

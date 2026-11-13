@@ -7,9 +7,15 @@ import com.wdiscute.artisan.upgrades.MachineSettings;
 import com.wdiscute.artisan.upgrades.MachineUpgrade;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
@@ -83,10 +89,17 @@ public abstract class AbstractMachineBlock extends BaseEntityBlock
                         if (machineSettings.upgradeSlots() > adbe.upgrades.size())
                         {
                             //put upgrade
-                            if (!level.isClientSide)
+                            if(level instanceof ServerLevel sl)
+                            {
+                                level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS);
+                                sl.sendParticles(ParticleTypes.HAPPY_VILLAGER, pos.getX() + 0.5f, pos.getY(), pos.getZ() + 0.5f,
+                                        20, 0.3f, 1, 0.3f, 0);
                                 adbe.putUpgrade(stack, machineUpgrade);
-                            stack.shrink(1);
-                            return ItemInteractionResult.CONSUME;
+                                stack.shrink(1);
+                                return ItemInteractionResult.SUCCESS;
+                            }
+
+                            return ItemInteractionResult.SUCCESS;
                         }
                     }
                 }
@@ -101,37 +114,53 @@ public abstract class AbstractMachineBlock extends BaseEntityBlock
                 //continue if one of the previous inputs made the machine start working
                 if (level.getBlockState(pos).getValue(AbstractMachineBlock.STATE).equals(State.WORKING)) continue;
 
-                //add item to blockEntity
                 if (level.getBlockEntity(pos) instanceof AbstractMachineBlockEntity adbe)
                 {
                     //get all recipes using item
                     var recipesUsingItem = level.getRecipeManager().getAllRecipesFor(adbe.getRecipeType())
-                            .stream().filter(holder -> holder.value().getIngredients()
-                                    .stream().anyMatch(o -> o.test(stack))).toList();
+                            .stream()
+                            .filter(holder -> holder.value().getIngredients()
+                                    .stream().anyMatch(o -> o.test(stack))
+                            )
+                            .map(RecipeHolder::value)
+                            .toList();
 
-                    //check every recipe if item "fits" into any recipe
-                    for (RecipeHolder<? extends AbstractArtisanRecipe> abstractArtisanRecipeRecipeHolder : recipesUsingItem)
+                    List<ItemStack> inventory = new ArrayList<>(player.getInventory().items);
+                    inventory.addAll(player.getInventory().offhand);
+
+                    for (AbstractArtisanRecipe recipe : recipesUsingItem)
                     {
-                        //get all ingredients of recipe
-                        List<Ingredient> ingredients = new ArrayList<>(abstractArtisanRecipeRecipeHolder.value().getIngredients());
+                        if (!recipe.upgradesMatches(adbe.upgrades)) continue;
+                        if (recipe.hasBlacklistedUpgrade(adbe.upgrades)) continue;
 
-                        //for each item already in the block
-                        for (ItemStack item : adbe.getItems())
+                        int[] toConsume = matchIngredients(recipe.getIngredients(), inventory);
+                        if (toConsume == null) continue;
+
+                        if(level.isClientSide)
+                            return ItemInteractionResult.SUCCESS;
+
+                        //start recipe on block entity
+                        adbe.startRecipe(recipe);
+                        level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS);
+
+                        //consume stacks and store on machine
+                        if (!player.isCreative())
                         {
-                            //if the ingredient matches the item inside the block, remove it from the list
-                            if (ingredients.stream().anyMatch(o -> o.test(item)))
-                                ingredients.remove(ingredients.stream().filter(o -> o.test(item)).toList().getFirst());
+                            for (int s = 0; s < toConsume.length; s++)
+                            {
+                                int amount = toConsume[s];
+                                if (amount <= 0) continue;
+
+                                ItemStack stackToStore = inventory.get(s);
+                                adbe.putItem(stackToStore.copyWithCount(amount));
+                                stackToStore.shrink(amount);
+                            }
                         }
 
-                        //if there are any ingredients left that match the stack being put in
-                        if (ingredients.stream().anyMatch(o -> o.test(stack)))
-                        {
-                            adbe.putItem(stack);
-                            if (!level.isClientSide)
-                                stack.shrink(1);
-                            result = ItemInteractionResult.SUCCESS;
-                        }
+                        return ItemInteractionResult.SUCCESS;
                     }
+
+                    return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
                 }
             }
         }
@@ -156,6 +185,7 @@ public abstract class AbstractMachineBlock extends BaseEntityBlock
         {
             if (!level.isClientSide && level.getBlockEntity(pos) instanceof AbstractMachineBlockEntity adbe)
             {
+                level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS);
                 //all harvesting logic is done on block entity
                 adbe.harvest(level);
             }
@@ -166,6 +196,60 @@ public abstract class AbstractMachineBlock extends BaseEntityBlock
         if (result != null)
             return result;
         return super.useItemOn(stack, state, level, pos, player, hand, hitResult);
+    }
+
+    //checks if the player has enough items needed to meet all the ingredients,
+    //returns null if not, int[] with the slots to be consumed later
+    public static int[] matchIngredients(List<Ingredient> ingredients, List<ItemStack> stacks)
+    {
+        List<Ingredient> required = ingredients.stream().filter(i -> !i.isEmpty()).toList();
+
+        List<List<Integer>> owners = new ArrayList<>(stacks.size());
+        for (int i = 0; i < stacks.size(); i++)
+            owners.add(new ArrayList<>());
+
+        for (int i = 0; i < required.size(); i++)
+            if (!tryAssign(required, stacks, i, owners, new boolean[stacks.size()]))
+                return null;
+
+        int[] toConsume = new int[stacks.size()];
+        for (int s = 0; s < toConsume.length; s++)
+            toConsume[s] = owners.get(s).size();
+        return toConsume;
+    }
+
+    //algorithm to "assign" an itemstack to a consumed/checked off ingredient
+    private static boolean tryAssign(List<Ingredient> required, List<ItemStack> stacks, int ingredientIdx,
+                                     List<List<Integer>> owners, boolean[] visited)
+    {
+        Ingredient ingredient = required.get(ingredientIdx);
+
+        for (int s = 0; s < stacks.size(); s++)
+        {
+            if (visited[s]) continue;
+
+            ItemStack stack = stacks.get(s);
+            if (stack.isEmpty() || !ingredient.test(stack)) continue;
+
+            visited[s] = true;
+            List<Integer> assigned = owners.get(s);
+
+            if (assigned.size() < stack.getCount())
+            {
+                assigned.add(ingredientIdx);
+                return true;
+            }
+
+            for (int k = 0; k < assigned.size(); k++)
+            {
+                if (tryAssign(required, stacks, assigned.get(k), owners, visited))
+                {
+                    assigned.set(k, ingredientIdx);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -237,7 +321,7 @@ public abstract class AbstractMachineBlock extends BaseEntityBlock
     @Override
     protected RenderShape getRenderShape(BlockState state)
     {
-        return RenderShape.MODEL;
+        return RenderShape.INVISIBLE;
     }
 
     @Override

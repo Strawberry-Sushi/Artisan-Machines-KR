@@ -203,6 +203,8 @@ public class DGArtisanRecipeProvider extends RecipeProvider
                 Items.SEA_PICKLE.getDefaultInstance(),
                 PreservesJarRecipe::new,
                 2,
+                List.of(),
+                List.of(Ingredient.of(ArtisanItems.STONE_HAND)),
                 Ingredient.of(Items.CACTUS),
                 Ingredient.of(Items.CACTUS),
                 Ingredient.of(Items.CACTUS),
@@ -217,8 +219,8 @@ public class DGArtisanRecipeProvider extends RecipeProvider
                 Items.SEA_PICKLE.getDefaultInstance(),
                 PreservesJarRecipe::new,
                 2,
-                List.of(),
                 List.of(Ingredient.of(ArtisanItems.STONE_HAND)),
+                List.of(),
                 Ingredient.of(Items.CACTUS),
                 Ingredient.of(Items.CACTUS)
         )

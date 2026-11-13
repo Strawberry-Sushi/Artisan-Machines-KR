@@ -20,13 +20,18 @@ public record MachineUpgrade
     public static final Codec<MachineUpgrade> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
                     BuiltInRegistries.BLOCK_ENTITY_TYPE.byNameCodec().listOf().fieldOf("machines").forGetter(MachineUpgrade::machines),
-                    AbstractUpgrade.UPGRADE_CODEC.listOf().fieldOf("upgrades").forGetter(MachineUpgrade::upgrades)
+                    AbstractUpgrade.UPGRADE_CODEC.listOf().optionalFieldOf("upgrades", List.of()).forGetter(MachineUpgrade::upgrades)
             ).apply(instance, MachineUpgrade::new));
 
 
     public MachineUpgrade(BlockEntityType<?> machine, AbstractUpgrade upgrade)
     {
         this(List.of(machine), List.of(upgrade));
+    }
+
+    public MachineUpgrade(BlockEntityType<?> machine)
+    {
+        this(List.of(machine), List.of());
     }
 
     public MachineUpgrade(List<BlockEntityType<?>> machines, AbstractUpgrade upgrade)

@@ -70,11 +70,22 @@
     },
     "artisan_machines:enkephalin": {
       "machines": [
-        "artisan_machines:preserves_jar"
+        "artisan_machines:mayonnaise_machine"
       ],
       "upgrades": [
         {
-          "type": "artisan_machines:empty"
+          "type": "artisan_machines:add_all_to_result",
+          "chance": 1.0,
+          "stacks": [
+            {
+              "components": {
+                "minecraft:custom_name": "\"Supreme Mayo\""
+              },
+              "count": 1,
+              "id": "minecraft:white_carpet"
+            }
+          ],
+          "tags": []
         }
       ]
     },
@@ -148,6 +159,11 @@
         {
           "type": "artisan_machines:double_result"
         }
+      ]
+    },
+    "artisan_machines:stone_hand": {
+      "machines": [
+        "artisan_machines:preserves_jar"
       ]
     },
     "artisan_machines:tiny_gnome": {

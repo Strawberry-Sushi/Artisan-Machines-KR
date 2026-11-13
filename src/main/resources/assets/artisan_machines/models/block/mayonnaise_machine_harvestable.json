@@ -4,7 +4,7 @@
 	"render_type": "cutout_mipped",
 	"textures": {
 		"1": "artisan_machines:block/mayonnaise_machine_harvestable",
-		"particle": "artisan_machines:block/mayonnaise_machine_harvestable"
+		"particle": "artisan_machines:block/mayonnaise_machine_particle"
 	},
 	"elements": [
 		{

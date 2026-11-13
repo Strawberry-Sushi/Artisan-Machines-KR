@@ -1,26 +1,25 @@
 package com.wdiscute.artisan.machines;
 
-import com.google.errorprone.annotations.DoNotCall;
 import com.wdiscute.artisan.ArtisanConfig;
 import com.wdiscute.artisan.ChancedStack;
 import com.wdiscute.artisan.recipe.AbstractArtisanRecipe;
 import com.wdiscute.artisan.recipe.ArtisanRecipeInput;
 import com.wdiscute.artisan.registry.ArtisanDataMaps;
 import com.wdiscute.artisan.upgrades.AbstractUpgrade;
-import com.wdiscute.artisan.upgrades.EmptyUpgrade;
 import com.wdiscute.artisan.upgrades.MachineSettings;
 import com.wdiscute.artisan.upgrades.MachineUpgrade;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -47,6 +46,12 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity
         super(type, pos, blockState);
     }
 
+    public boolean isWorking()
+    {
+        return getBlockState().getOptionalValue(AbstractMachineBlock.STATE)
+                .orElse(AbstractMachineBlock.State.IDLE).equals(AbstractMachineBlock.State.WORKING);
+    }
+
     public int getHoursRemaining()
     {
         return hoursRemaining;
@@ -60,8 +65,6 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity
     public void putItem(ItemStack itemStack)
     {
         items.add(itemStack.copyWithCount(1));
-        if (!level.isClientSide)
-            checkForRecipe();
         setChanged();
     }
 
@@ -74,9 +77,10 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity
 
     private List<AbstractUpgrade> upgradesCache;
     private List<ItemStack> upgradeItemsCache;
+
     public List<AbstractUpgrade> getUpgrades()
     {
-        if(upgradesCache != null && upgradeItemsCache == upgrades) return upgradesCache;
+        if (upgradesCache != null && upgradeItemsCache == upgrades) return upgradesCache;
         //gets every upgrade from the items stored using the datamap
         List<List<AbstractUpgrade>> list = upgrades.stream().map(o -> ArtisanDataMaps.getOrDefault(o).upgrades()).toList();
         List<AbstractUpgrade> upgrades = new ArrayList<>();
@@ -96,7 +100,7 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity
 
         for (ChancedStack chancedStack : recipeResult)
         {
-            if(level.getRandom().nextFloat() < chancedStack.chance())
+            if (level.getRandom().nextFloat() < chancedStack.chance())
             {
                 results.add(chancedStack.stack());
             }
@@ -133,21 +137,14 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity
         getUpgrades().forEach(o -> o.onFinishedHarvest(this));
     }
 
-    public void checkForRecipe()
+    public void startRecipe(AbstractArtisanRecipe recipe)
     {
-        ArtisanRecipeInput input = new ArtisanRecipeInput(items, upgrades);
-
-        var recipeFor = level.getRecipeManager().getRecipeFor(getRecipeType(), input, level);
-        if (recipeFor.isPresent())
-        {
-            AbstractArtisanRecipe recipe = recipeFor.get().value();
-            recipeResult = recipe.getResult();
-            level.setBlockAndUpdate(worldPosition, getBlockState().setValue(AbstractMachineBlock.STATE, AbstractMachineBlock.State.WORKING));
-            //+1 as a recipe put 1 second before daily reset shouldn't be finished
-            hoursRemaining = recipe.getHours() + 1;
-            lastTickHour = -1;
-            getUpgrades().forEach(o -> o.onRecipeStarted(recipe, this));
-        }
+        recipeResult = recipe.getResult();
+        level.setBlockAndUpdate(worldPosition, getBlockState().setValue(AbstractMachineBlock.STATE, AbstractMachineBlock.State.WORKING));
+        //+1 as a recipe put 1 second before daily reset shouldn't be finished
+        hoursRemaining = recipe.getHours() + 1;
+        lastTickHour = -1;
+        getUpgrades().forEach(o -> o.onRecipeStarted(recipe, this));
 
         setChanged();
     }
@@ -191,7 +188,13 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity
         //if recipe finished
         if (hoursRemaining == 0)
         {
-            System.out.println("Completed Recipe in " + this.getBlockPos() + " for an output of " + recipeResult);
+            if(level instanceof ServerLevel sl)
+            {
+                BlockPos pos = getBlockPos();
+                sl.sendParticles(ParticleTypes.ASH, pos.getX() + 0.5f, pos.getY(), pos.getZ() + 0.5f,
+                        20, 0.3f, 1, 0.3f, 0);
+            }
+
             level.setBlockAndUpdate(worldPosition, state.setValue(AbstractMachineBlock.STATE, AbstractMachineBlock.State.HARVESTABLE));
         }
 
@@ -317,7 +320,7 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity
 
     public static <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state)
     {
-        //don't tick on click
+        //don't tick on client
         if (level.isClientSide) return null;
 
         return (level0, pos0, state0, blockEntity) ->
@@ -328,14 +331,6 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity
             if (state.getValue(AbstractMachineBlock.STATE).equals(AbstractMachineBlock.State.WORKING) || adbe.shouldTickNonWorking())
             {
                 //tick with offset
-
-                System.out.println("gametime - " + level.getGameTime());
-                System.out.println("getTickOffset - " + adbe.getTickOffset(level));
-                System.out.println("ArtisanConfig.TICK_DELAY.get() - " + ArtisanConfig.TICK_DELAY.get());
-
-                System.out.println("mod - " + ((level.getGameTime() + adbe.getTickOffset(level)) % ArtisanConfig.TICK_DELAY.get()));
-
-
                 if ((level.getGameTime() + adbe.getTickOffset(level)) % ArtisanConfig.TICK_DELAY.get() == 0)
                     adbe.tick();
 

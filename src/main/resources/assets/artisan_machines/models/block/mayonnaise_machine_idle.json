@@ -4,7 +4,7 @@
 	"render_type": "cutout_mipped",
 	"textures": {
 		"0": "artisan_machines:block/mayonnaise_machine_idle",
-		"particle": "artisan_machines:block/mayonnaise_machine_idle"
+		"particle": "artisan_machines:block/mayonnaise_machine_particle"
 	},
 	"elements": [
 		{
