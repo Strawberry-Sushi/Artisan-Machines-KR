@@ -101,17 +101,12 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity
         List<ItemStack> results = new ArrayList<>();
 
         for (ChancedStack chancedStack : recipeResult)
-        {
             if (level.getRandom().nextFloat() < chancedStack.chance())
-            {
                 results.add(chancedStack.stack());
-            }
-        }
 
         for (AbstractUpgrade upgrade : getUpgrades())
-        {
             results = upgrade.modifyHarvestResult(this, results);
-        }
+
         return results;
     }
 
