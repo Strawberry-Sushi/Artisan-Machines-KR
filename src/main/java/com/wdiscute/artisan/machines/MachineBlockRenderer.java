@@ -47,7 +47,6 @@ public class MachineBlockRenderer implements BlockEntityRenderer<AbstractMachine
 
         BlockPos pos = blockEntity.getBlockPos();
 
-        poseStack.pushPose();
 
         if (blockEntity.isWorking())
         {
@@ -55,6 +54,11 @@ public class MachineBlockRenderer implements BlockEntityRenderer<AbstractMachine
             poseStack.translate(0.5, a[2], 0.5);
             poseStack.scale(a[0], a[1], a[0]);
             poseStack.translate(-0.5, 0, -0.5);
+        }
+        else
+        {
+            poseStack.popPose();
+            return;
         }
 
         RandomSource random = RandomSource.create(state.getSeed(pos));

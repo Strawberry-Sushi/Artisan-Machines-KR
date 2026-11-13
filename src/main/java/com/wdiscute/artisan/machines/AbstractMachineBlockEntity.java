@@ -48,7 +48,8 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity
 
     public boolean isWorking()
     {
-        return getBlockState().getOptionalValue(AbstractMachineBlock.STATE)
+        BlockState blockState = getBlockState();
+        return blockState.getOptionalValue(AbstractMachineBlock.STATE)
                 .orElse(AbstractMachineBlock.State.IDLE).equals(AbstractMachineBlock.State.WORKING);
     }
 

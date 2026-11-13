@@ -89,7 +89,7 @@ public abstract class AbstractMachineBlock extends BaseEntityBlock
                         if (machineSettings.upgradeSlots() > adbe.upgrades.size())
                         {
                             //put upgrade
-                            if(level instanceof ServerLevel sl)
+                            if (level instanceof ServerLevel sl)
                             {
                                 level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS);
                                 sl.sendParticles(ParticleTypes.HAPPY_VILLAGER, pos.getX() + 0.5f, pos.getY(), pos.getZ() + 0.5f,
@@ -136,7 +136,7 @@ public abstract class AbstractMachineBlock extends BaseEntityBlock
                         int[] toConsume = matchIngredients(recipe.getIngredients(), inventory);
                         if (toConsume == null) continue;
 
-                        if(level.isClientSide)
+                        if (level.isClientSide)
                             return ItemInteractionResult.SUCCESS;
 
                         //start recipe on block entity
@@ -321,7 +321,10 @@ public abstract class AbstractMachineBlock extends BaseEntityBlock
     @Override
     protected RenderShape getRenderShape(BlockState state)
     {
-        return RenderShape.INVISIBLE;
+        if (state.getOptionalValue(STATE).orElse(State.IDLE).equals(State.WORKING))
+            return RenderShape.INVISIBLE;
+        else
+            return RenderShape.MODEL;
     }
 
     @Override
