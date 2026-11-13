@@ -46,6 +46,7 @@ public class MachineBlockRenderer implements BlockEntityRenderer<AbstractMachine
         if (level == null || state.isAir()) return;
 
         BlockPos pos = blockEntity.getBlockPos();
+        poseStack.pushPose();
 
 
         if (blockEntity.isWorking())
@@ -70,10 +71,10 @@ public class MachineBlockRenderer implements BlockEntityRenderer<AbstractMachine
                     level,
                     model,
                     state,
-                    pos,
+                    pos.above(),
                     poseStack,
                     bufferSource.getBuffer(RenderTypeHelper.getMovingBlockRenderType(renderType)),
-                    false,
+                    true,
                     random,
                     state.getSeed(pos),
                     OverlayTexture.NO_OVERLAY,
