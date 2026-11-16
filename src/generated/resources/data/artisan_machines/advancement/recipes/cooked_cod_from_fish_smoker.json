@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_sunflower": {
+    "has_cod": {
       "conditions": {
         "items": [
           {
-            "items": "minecraft:sunflower"
+            "items": "minecraft:cod"
           }
         ]
       },
@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:honey_bottle_from_oil_maker"
+        "recipe": "artisan_machines:cooked_cod_from_fish_smoker"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -21,12 +21,12 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_sunflower"
+      "has_cod"
     ]
   ],
   "rewards": {
     "recipes": [
-      "minecraft:honey_bottle_from_oil_maker"
+      "artisan_machines:cooked_cod_from_fish_smoker"
     ]
   }
 }

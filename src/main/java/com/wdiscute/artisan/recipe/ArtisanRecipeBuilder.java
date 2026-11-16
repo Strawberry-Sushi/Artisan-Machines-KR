@@ -1,5 +1,6 @@
 package com.wdiscute.artisan.recipe;
 
+import com.wdiscute.artisan.Artisan;
 import com.wdiscute.artisan.ChancedStack;
 import com.wdiscute.utils.MaybeStack;
 import net.minecraft.advancements.Advancement;
@@ -91,7 +92,7 @@ public class ArtisanRecipeBuilder implements RecipeBuilder
     @Override
     public void save(RecipeOutput recipeOutput)
     {
-        save(recipeOutput, ResourceLocation.withDefaultNamespace(
+        save(recipeOutput, Artisan.rl(
                 BuiltInRegistries.ITEM.getKey(stackResult.getFirst().stack().toStack().getItem()).getPath()
                         + "_from_" + group));
     }
@@ -100,7 +101,7 @@ public class ArtisanRecipeBuilder implements RecipeBuilder
     @Override
     public void save(RecipeOutput recipeOutput, String append)
     {
-        save(recipeOutput, ResourceLocation.withDefaultNamespace(
+        save(recipeOutput, Artisan.rl(
                 BuiltInRegistries.ITEM.getKey(stackResult.getFirst().stack().toStack().getItem()).getPath()
                         + "_from_" + group + "_" + append));
     }

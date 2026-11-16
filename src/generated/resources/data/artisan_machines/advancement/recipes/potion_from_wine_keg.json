@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:dragon_breath_from_ancient_cask"
+        "recipe": "artisan_machines:potion_from_wine_keg"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "minecraft:dragon_breath_from_ancient_cask"
+      "artisan_machines:potion_from_wine_keg"
     ]
   }
 }

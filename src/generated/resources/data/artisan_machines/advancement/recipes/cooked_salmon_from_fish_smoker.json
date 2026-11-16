@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_egg": {
+    "has_salmon": {
       "conditions": {
         "items": [
           {
-            "items": "minecraft:egg"
+            "items": "minecraft:salmon"
           }
         ]
       },
@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:milk_bucket_from_mayonnaise_machine"
+        "recipe": "artisan_machines:cooked_salmon_from_fish_smoker"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -21,12 +21,12 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_egg"
+      "has_salmon"
     ]
   ],
   "rewards": {
     "recipes": [
-      "minecraft:milk_bucket_from_mayonnaise_machine"
+      "artisan_machines:cooked_salmon_from_fish_smoker"
     ]
   }
 }

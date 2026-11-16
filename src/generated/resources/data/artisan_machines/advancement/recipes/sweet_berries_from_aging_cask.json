@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_seeds": {
+    "has_grapes": {
       "conditions": {
         "items": [
           {
-            "items": "#minecraft:villager_plantable_seeds"
+            "items": "minecraft:sweet_berries"
           }
         ]
       },
@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:hay_block_from_dehydrator_upgraded"
+        "recipe": "artisan_machines:sweet_berries_from_aging_cask"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -21,12 +21,12 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_seeds"
+      "has_grapes"
     ]
   ],
   "rewards": {
     "recipes": [
-      "minecraft:hay_block_from_dehydrator_upgraded"
+      "artisan_machines:sweet_berries_from_aging_cask"
     ]
   }
 }

@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_string": {
+    "has_milk": {
       "conditions": {
         "items": [
           {
-            "items": "minecraft:string"
+            "items": "minecraft:milk_bucket"
           }
         ]
       },
@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:white_wool_from_loom"
+        "recipe": "artisan_machines:yellow_wool_from_cheese_press"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -21,12 +21,12 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_string"
+      "has_milk"
     ]
   ],
   "rewards": {
     "recipes": [
-      "minecraft:white_wool_from_loom"
+      "artisan_machines:yellow_wool_from_cheese_press"
     ]
   }
 }

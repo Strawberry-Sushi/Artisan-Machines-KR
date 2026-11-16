@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_seeds": {
+    "has_stone": {
       "conditions": {
         "items": [
           {
-            "items": "#minecraft:villager_plantable_seeds"
+            "items": "minecraft:stone"
           }
         ]
       },
@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:hay_block_from_dehydrator"
+        "recipe": "artisan_machines:raw_copper_from_recycling_machine"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -21,12 +21,12 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_seeds"
+      "has_stone"
     ]
   ],
   "rewards": {
     "recipes": [
-      "minecraft:hay_block_from_dehydrator"
+      "artisan_machines:raw_copper_from_recycling_machine"
     ]
   }
 }

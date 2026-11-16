@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:emerald_from_crystalarium"
+        "recipe": "artisan_machines:emerald_from_crystalarium"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "minecraft:emerald_from_crystalarium"
+      "artisan_machines:emerald_from_crystalarium"
     ]
   }
 }

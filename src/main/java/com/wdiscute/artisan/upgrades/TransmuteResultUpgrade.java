@@ -43,11 +43,8 @@ public class TransmuteResultUpgrade extends AbstractUpgrade
     @Override
     public List<ItemStack> modifyHarvestResult(AbstractMachineBlockEntity machine, List<ItemStack> results)
     {
-
         for (TransmuteResult transmutation : transmutations)
-        {
             transmutation.transmute(results, machine.getLevel().getRandom());
-        }
 
         return results;
     }

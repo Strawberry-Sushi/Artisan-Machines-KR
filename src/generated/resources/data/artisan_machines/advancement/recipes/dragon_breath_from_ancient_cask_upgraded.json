@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_salmon": {
+    "has_grapes": {
       "conditions": {
         "items": [
           {
-            "items": "minecraft:salmon"
+            "items": "minecraft:sweet_berries"
           }
         ]
       },
@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:bone_from_bait_maker"
+        "recipe": "artisan_machines:dragon_breath_from_ancient_cask_upgraded"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -21,12 +21,12 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_salmon"
+      "has_grapes"
     ]
   ],
   "rewards": {
     "recipes": [
-      "minecraft:bone_from_bait_maker"
+      "artisan_machines:dragon_breath_from_ancient_cask_upgraded"
     ]
   }
 }

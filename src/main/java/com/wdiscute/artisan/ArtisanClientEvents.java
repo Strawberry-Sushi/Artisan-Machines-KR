@@ -38,7 +38,7 @@ public class ArtisanClientEvents
         if (!(level.getBlockEntity(pos) instanceof AbstractMachineBlockEntity be) || !be.isWorking()) return;
 
         float partial = event.getDeltaTracker().getGameTimeDeltaPartialTick(false);
-        float[] a = MachineBlockRenderer.squish(level, pos, partial, !be.upgrades.isEmpty());
+        float[] a = MachineBlockRenderer.squish(pos, partial, !be.upgrades.isEmpty());
         float sxz = a[0], sy = a[1], hop = a[2];
 
         Vec3 cam = event.getCamera().getPosition();

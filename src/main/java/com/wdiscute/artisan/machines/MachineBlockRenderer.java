@@ -2,6 +2,8 @@ package com.wdiscute.artisan.machines;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.wdiscute.artisan.ArtisanConfig;
+import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -26,10 +28,10 @@ public class MachineBlockRenderer implements BlockEntityRenderer<AbstractMachine
         blockRenderer = context.getBlockRenderDispatcher();
     }
 
-    public static float[] squish(Level level, BlockPos pos, float partialTick, boolean upgraded)
+    public static float[] squish(BlockPos pos, float partialTick, boolean upgraded)
     {
         double intensity = upgraded ? ArtisanConfig.BOB_AMOUNT_UPGRADED.get() : ArtisanConfig.BOB_AMOUNT.get();
-        double angle = ((level.getGameTime() + (double) partialTick) + pos.getX() + pos.getZ()) * 0.3;
+        double angle = ((Minecraft.getInstance().gui.getGuiTicks() + (double) partialTick) + pos.getX() + pos.getZ()) * 0.3;
         float s = Mth.sin((float) (angle % (Math.PI * 2)));
         float sy = (float) (1f + s * 0.1f * intensity);
         float sxz = 1f / Mth.sqrt(sy);
@@ -43,25 +45,24 @@ public class MachineBlockRenderer implements BlockEntityRenderer<AbstractMachine
     {
         Level level = blockEntity.getLevel();
         BlockState state = blockEntity.getBlockState();
-        if (level == null || state.isAir()) return;
 
-        BlockPos pos = blockEntity.getBlockPos();
-        poseStack.pushPose();
+        if (level == null || state.isAir())
+            return;
 
-
-        if (blockEntity.isWorking())
-        {
-            float[] a = squish(level, pos, partialTick, !blockEntity.upgrades.isEmpty());
-            System.out.println(a[0] + " - " + a[1] + " - " + a[2]);
-            poseStack.translate(0.5, a[2], 0.5);
-            poseStack.scale(a[0], a[1], a[0]);
-            poseStack.translate(-0.5, 0, -0.5);
-        }
-        else
+        if (!blockEntity.isWorking())
         {
             poseStack.popPose();
             return;
         }
+
+        BlockPos pos = blockEntity.getBlockPos();
+        poseStack.pushPose();
+
+        //very squishy machine
+        float[] a = squish(pos, partialTick, !blockEntity.upgrades.isEmpty());
+        poseStack.translate(0.5, a[2], 0.5);
+        poseStack.scale(a[0], a[1], a[0]);
+        poseStack.translate(-0.5, 0, -0.5);
 
         RandomSource random = RandomSource.create(state.getSeed(pos));
         BakedModel model = blockRenderer.getBlockModel(state);

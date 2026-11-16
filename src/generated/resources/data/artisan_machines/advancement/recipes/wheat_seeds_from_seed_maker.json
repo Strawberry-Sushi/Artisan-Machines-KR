@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_stone": {
+    "has_grass": {
       "conditions": {
         "items": [
           {
-            "items": "minecraft:stone"
+            "items": "minecraft:short_grass"
           }
         ]
       },
@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:raw_copper_from_recycling_machine"
+        "recipe": "artisan_machines:wheat_seeds_from_seed_maker"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -21,12 +21,12 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_stone"
+      "has_grass"
     ]
   ],
   "rewards": {
     "recipes": [
-      "minecraft:raw_copper_from_recycling_machine"
+      "artisan_machines:wheat_seeds_from_seed_maker"
     ]
   }
 }
