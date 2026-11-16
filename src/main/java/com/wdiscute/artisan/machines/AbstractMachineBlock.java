@@ -2,17 +2,15 @@ package com.wdiscute.artisan.machines;
 
 import com.mojang.serialization.MapCodec;
 import com.wdiscute.artisan.recipe.AbstractArtisanRecipe;
+import com.wdiscute.artisan.registry.ArtisanDataAttachments;
 import com.wdiscute.artisan.registry.ArtisanDataMaps;
 import com.wdiscute.artisan.upgrades.MachineSettings;
 import com.wdiscute.artisan.upgrades.MachineUpgrade;
+import com.wdiscute.utils.MaybeStack;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -22,7 +20,6 @@ import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -34,7 +31,6 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.entity.LecternBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
@@ -44,6 +40,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public abstract class AbstractMachineBlock extends BaseEntityBlock
@@ -83,7 +80,7 @@ public abstract class AbstractMachineBlock extends BaseEntityBlock
                 {
                     //if machine can use repeated upgrades, OR none of the upgrade items already inside match the item attempting to be put in
                     MachineSettings machineSettings = ArtisanDataMaps.getOrDefault(adbe);
-                    if (machineSettings.canUseRepeatedUpgrades() || adbe.upgrades.stream().noneMatch(o -> o.is(stack.getItem())))
+                    if (machineSettings.canUseRepeatedUpgrades() || adbe.upgrades.stream().noneMatch(o -> o.toStack().is(stack.getItem())))
                     {
                         //if there is space for another upgrade
                         if (machineSettings.upgradeSlots() > adbe.upgrades.size())
@@ -122,6 +119,7 @@ public abstract class AbstractMachineBlock extends BaseEntityBlock
                             .filter(holder -> holder.value().getIngredients()
                                     .stream().anyMatch(o -> o.test(stack))
                             )
+                            .sorted(AbstractArtisanRecipe.RANK_ORDER)
                             .map(RecipeHolder::value)
                             .toList();
 
@@ -130,8 +128,7 @@ public abstract class AbstractMachineBlock extends BaseEntityBlock
 
                     for (AbstractArtisanRecipe recipe : recipesUsingItem)
                     {
-                        if (!recipe.upgradesMatches(adbe.upgrades)) continue;
-                        if (recipe.hasBlacklistedUpgrade(adbe.upgrades)) continue;
+                        if (!recipe.upgradesMatches(adbe.upgrades.stream().map(MaybeStack::toStack).toList())) continue;
 
                         int[] toConsume = matchIngredients(recipe.getIngredients(), inventory);
                         if (toConsume == null) continue;
@@ -187,11 +184,10 @@ public abstract class AbstractMachineBlock extends BaseEntityBlock
             {
                 level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS);
                 //all harvesting logic is done on block entity
-                adbe.harvest(level);
+                adbe.harvest(player.getData(ArtisanDataAttachments.UPGRADES));
             }
             return ItemInteractionResult.SUCCESS;
         }
-
 
         if (result != null)
             return result;
@@ -274,7 +270,7 @@ public abstract class AbstractMachineBlock extends BaseEntityBlock
             //drop items stored if working/idle
             else
             {
-                for (ItemStack stack : ambe.getItems())
+                for (ItemStack stack : ambe.getItems().stream().map(MaybeStack::toStack).toList())
                 {
                     Vec3 vec3 = Vec3.atLowerCornerWithOffset(pos, 0.5, 1.01, 0.5).offsetRandom(level.random, 0.7F);
                     ItemEntity itementity = new ItemEntity(level, vec3.x(), vec3.y(), vec3.z(), stack);
@@ -284,7 +280,7 @@ public abstract class AbstractMachineBlock extends BaseEntityBlock
             }
 
             //drop upgrades regardless
-            for (ItemStack stack : ambe.upgrades)
+            for (ItemStack stack : ambe.upgrades.stream().map(MaybeStack::toStack).toList())
             {
                 Vec3 vec3 = Vec3.atLowerCornerWithOffset(pos, 0.5, 1.01, 0.5).offsetRandom(level.random, 0.7F);
                 ItemEntity itementity = new ItemEntity(level, vec3.x(), vec3.y(), vec3.z(), stack);
@@ -299,9 +295,30 @@ public abstract class AbstractMachineBlock extends BaseEntityBlock
     public void displayTimeRemainingClientMessage(Player player, AbstractMachineBlockEntity adbe)
     {
         if (!adbe.getResultItem().isEmpty())
-            player.displayClientMessage(Component.translatable("block.artisan_machines.machine.currently_making")
-                    .append(adbe.recipeResult.getFirst().stack().getHoverName())
-                    .append(Component.translatable("block.artisan_machines.machine.hours", adbe.getHoursRemaining())), true);
+        {
+            int days = adbe.getHoursRemaining() / 24;
+            int hours = adbe.getHoursRemaining() % 24;
+
+            MutableComponent comp;
+
+            if (days > 0)
+            {
+                if (hours != 0)
+                    comp = Component.translatable("jemi.processing_time.days_hours", days, hours);
+                else
+                    comp = Component.translatable("jemi.processing_time.days", days);
+            }
+            else
+            {
+                comp = Component.translatable("jemi.processing_time.hours", hours);
+            }
+
+            ItemStack stack = adbe.recipeResult.getFirst().stack().toStack();
+            player.displayClientMessage(Component.translatable("block.artisan_machines.machine.currently_making",
+                            stack.getHoverName(), stack.getCount() == 1 ? "- " : "x" + stack.getCount() + " - ")
+                    .append(comp), true);
+        }
+
     }
 
     @Override
@@ -330,7 +347,7 @@ public abstract class AbstractMachineBlock extends BaseEntityBlock
     @Override
     public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType)
     {
-        return AbstractMachineBlockEntity.getTicker(level, state);
+        return AbstractMachineBlockEntity.getTicker(level);
     }
 
     public enum State implements StringRepresentable

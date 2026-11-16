@@ -13,9 +13,9 @@ import java.util.List;
 
 public class MayonnaiseMachineRecipe extends AbstractArtisanRecipe
 {
-    public MayonnaiseMachineRecipe(List<Ingredient> ingredients, List<ChancedStack> result, int processing_hours, List<Ingredient> requiredUpgrades, List<Ingredient> blacklistedUpgrades)
+    public MayonnaiseMachineRecipe(List<Ingredient> ingredients, List<ChancedStack> result, int processing_hours, List<Ingredient> requiredUpgrades, int rank)
     {
-        super(ArtisanRecipeTypes.MAYONNAISE_MACHINE.get(), ingredients, result, processing_hours, requiredUpgrades, blacklistedUpgrades);
+        super(ArtisanRecipeTypes.MAYONNAISE_MACHINE.get(), ingredients, result, processing_hours, requiredUpgrades, rank);
     }
 
     @Override

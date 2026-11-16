@@ -1,16 +1,10 @@
 {
   "type": "artisan_machines:preserves_jar",
-  "blacklisted_upgrades": [
-    {
-      "item": "artisan_machines:stone_hand"
-    }
-  ],
   "chanced_results": [
     {
       "chance": 1.0,
       "stack": {
-        "count": 1,
-        "id": "minecraft:sea_pickle"
+        "identifier": "minecraft:sea_pickle"
       }
     }
   ],
@@ -29,5 +23,6 @@
     }
   ],
   "processing_hours": 2,
+  "rank": 0,
   "required_upgrades": []
 }

@@ -1,12 +1,11 @@
 {
   "type": "artisan_machines:seed_maker",
-  "blacklisted_upgrades": [],
   "chanced_results": [
     {
       "chance": 1.0,
       "stack": {
         "count": 10,
-        "id": "minecraft:wheat_seeds"
+        "identifier": "minecraft:wheat_seeds"
       }
     }
   ],
@@ -22,5 +21,6 @@
     }
   ],
   "processing_hours": 2,
+  "rank": 0,
   "required_upgrades": []
 }

@@ -5,6 +5,7 @@ import com.wdiscute.artisan.registry.ArtisanBlockEntities;
 import com.wdiscute.artisan.registry.ArtisanDataMaps;
 import com.wdiscute.artisan.registry.ArtisanItems;
 import com.wdiscute.artisan.upgrades.*;
+import com.wdiscute.utils.MaybeStack;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.component.DataComponents;
@@ -34,7 +35,7 @@ public class DGArtisanDataMapsProvider extends DataMapProvider
     {
         var itemUpgrades = this.builder(ArtisanDataMaps.ARTISAN_UPGRADES);
 
-        //tiny gnome - looom
+        //tiny gnome - loom
         itemUpgrades.add(ArtisanItems.TINY_GNOME,
                 new MachineUpgrade(
                         ArtisanBlockEntities.LOOM.get(),
@@ -94,7 +95,7 @@ public class DGArtisanDataMapsProvider extends DataMapProvider
                 new MachineUpgrade(
                         ArtisanBlockEntities.DELUXE_WORM_FARM.get(),
                         new InfiniteCraftUpgrade(
-                                List.of(new ChancedStack(Items.SLIME_BALL.getDefaultInstance(), 1)),
+                                List.of(new ChancedStack(new MaybeStack(Items.SLIME_BALL), 1)),
                                 4
                         )
                 ),
@@ -162,9 +163,8 @@ public class DGArtisanDataMapsProvider extends DataMapProvider
         ItemStack battery = Items.DIAMOND.getDefaultInstance();
         battery.set(DataComponents.CUSTOM_NAME, Component.literal("Battery"));
         machineSettings.add(ArtisanBlockEntities.CHARGING_ROD,
-
                 new MachineSettings(
-                        List.of(new StartRecipeUpgrade(List.of(new ChancedStack(battery, 1)), 8, 0.1f, true)),
+                        List.of(new StartRecipeUpgrade(List.of(new ChancedStack(new MaybeStack(battery))), 8, 0.1f, true)),
                         1,
                         false
                 ),

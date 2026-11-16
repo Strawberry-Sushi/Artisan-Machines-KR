@@ -1,12 +1,11 @@
 {
   "type": "artisan_machines:loom",
-  "blacklisted_upgrades": [],
   "chanced_results": [
     {
       "chance": 1.0,
       "stack": {
         "count": 4,
-        "id": "minecraft:white_wool"
+        "identifier": "minecraft:white_wool"
       }
     }
   ],
@@ -25,5 +24,6 @@
     }
   ],
   "processing_hours": 8,
+  "rank": 0,
   "required_upgrades": []
 }

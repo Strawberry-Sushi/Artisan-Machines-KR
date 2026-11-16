@@ -1,0 +1,43 @@
+{
+  "type": "artisan_machines:aging_cask",
+  "chanced_results": [
+    {
+      "chance": 1.0,
+      "stack": {
+        "data_components_patch": {
+          "minecraft:enchantment_glint_override": true,
+          "minecraft:food": {
+            "effects": [
+              {
+                "effect": {
+                  "duration": 1000,
+                  "id": "minecraft:regeneration",
+                  "neoforge:cures": [
+                    "milk",
+                    "protected_by_totem"
+                  ],
+                  "show_icon": true
+                }
+              }
+            ],
+            "nutrition": 4,
+            "saturation": 2.4
+          },
+          "minecraft:rarity": "uncommon"
+        },
+        "identifier": "minecraft:sweet_berries"
+      }
+    }
+  ],
+  "ingredients": [
+    {
+      "item": "minecraft:sweet_berries"
+    },
+    {
+      "item": "minecraft:sugar"
+    }
+  ],
+  "processing_hours": 40,
+  "rank": 0,
+  "required_upgrades": []
+}

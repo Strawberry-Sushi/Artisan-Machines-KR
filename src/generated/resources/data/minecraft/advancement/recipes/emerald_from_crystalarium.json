@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_grapes": {
+    "has_emerald": {
       "conditions": {
         "items": [
           {
-            "items": "minecraft:sweet_berries"
+            "items": "minecraft:emerald"
           }
         ]
       },
@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:lingering_potion_from_ancient_cask"
+        "recipe": "minecraft:emerald_from_crystalarium"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -21,12 +21,12 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_grapes"
+      "has_emerald"
     ]
   ],
   "rewards": {
     "recipes": [
-      "minecraft:lingering_potion_from_ancient_cask"
+      "minecraft:emerald_from_crystalarium"
     ]
   }
 }

@@ -16,6 +16,7 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.registries.RegistryBuilder;
 import org.slf4j.Logger;
 
+import java.text.DecimalFormat;
 import java.util.Random;
 
 @Mod(Artisan.MOD_ID)
@@ -24,6 +25,7 @@ public class Artisan
     public static final Random r = new Random();
     public static final String MOD_ID = "artisan_machines";
     public static final Logger LOGGER = LogUtils.getLogger();
+    public static final DecimalFormat FORMAT = new DecimalFormat("#");
 
     public static ResourceLocation rl(String path)
     {
@@ -44,6 +46,7 @@ public class Artisan
         ArtisanItems.register(modEventBus);
         ArtisanBlocks.register(modEventBus);
         ArtisanBlockEntities.register(modEventBus);
+        ArtisanDataAttachments.register(modEventBus);
         ArtisanCreativeModeTabs.register(modEventBus);
         ArtisanRecipeTypes.register(modEventBus);
         ArtisanRecipeSerializers.register(modEventBus);

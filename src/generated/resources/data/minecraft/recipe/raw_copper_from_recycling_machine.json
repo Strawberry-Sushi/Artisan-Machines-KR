@@ -1,47 +1,40 @@
 {
   "type": "artisan_machines:recycling_machine",
-  "blacklisted_upgrades": [],
   "chanced_results": [
     {
       "chance": 0.3,
       "stack": {
-        "count": 1,
-        "id": "minecraft:raw_copper"
+        "identifier": "minecraft:raw_copper"
       }
     },
     {
       "chance": 0.1,
       "stack": {
-        "count": 1,
-        "id": "minecraft:raw_iron"
+        "identifier": "minecraft:raw_iron"
       }
     },
     {
       "chance": 0.1,
       "stack": {
-        "count": 1,
-        "id": "minecraft:lapis_lazuli"
+        "identifier": "minecraft:lapis_lazuli"
       }
     },
     {
       "chance": 0.01,
       "stack": {
-        "count": 1,
-        "id": "minecraft:diamond"
+        "identifier": "minecraft:diamond"
       }
     },
     {
       "chance": 0.7,
       "stack": {
-        "count": 1,
-        "id": "minecraft:cobblestone"
+        "identifier": "minecraft:cobblestone"
       }
     },
     {
       "chance": 0.6,
       "stack": {
-        "count": 1,
-        "id": "minecraft:deepslate"
+        "identifier": "minecraft:deepslate"
       }
     }
   ],
@@ -63,5 +56,6 @@
     }
   ],
   "processing_hours": 2,
+  "rank": 0,
   "required_upgrades": []
 }

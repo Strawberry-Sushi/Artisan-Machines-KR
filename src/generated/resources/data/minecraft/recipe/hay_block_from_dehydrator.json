@@ -1,12 +1,10 @@
 {
   "type": "artisan_machines:dehydrator",
-  "blacklisted_upgrades": [],
   "chanced_results": [
     {
       "chance": 1.0,
       "stack": {
-        "count": 1,
-        "id": "minecraft:hay_block"
+        "identifier": "minecraft:hay_block"
       }
     }
   ],
@@ -40,5 +38,6 @@
     }
   ],
   "processing_hours": 8,
+  "rank": 0,
   "required_upgrades": []
 }

@@ -111,8 +111,7 @@
             {
               "chance": 1.0,
               "stack": {
-                "count": 1,
-                "id": "minecraft:slime_ball"
+                "identifier": "minecraft:slime_ball"
               }
             }
           ]

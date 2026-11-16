@@ -13,9 +13,9 @@ import java.util.List;
 
 public class AncientCaskRecipe extends AbstractArtisanRecipe
 {
-    public AncientCaskRecipe(List<Ingredient> ingredients, List<ChancedStack> result, int processing_days, List<Ingredient> requiredUpgrades, List<Ingredient> blacklistedUpgrades)
+    public AncientCaskRecipe(List<Ingredient> ingredients, List<ChancedStack> result, int processing_days, List<Ingredient> requiredUpgrades, int rank)
     {
-        super(ArtisanRecipeTypes.ANCIENT_CASK.get(), ingredients, result, processing_days, requiredUpgrades, blacklistedUpgrades);
+        super(ArtisanRecipeTypes.ANCIENT_CASK.get(), ingredients, result, processing_days, requiredUpgrades, rank);
     }
 
     @Override

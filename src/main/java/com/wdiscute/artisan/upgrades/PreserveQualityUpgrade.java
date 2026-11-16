@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.wdiscute.artisan.compat.QualityFoodCompat;
 import com.wdiscute.artisan.machines.AbstractMachineBlockEntity;
 import com.wdiscute.artisan.registry.ArtisanUpgrades;
+import com.wdiscute.utils.MaybeStack;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryCodecs;
@@ -48,7 +49,7 @@ public class PreserveQualityUpgrade extends AbstractUpgrade
     {
         if(ModList.get().isLoaded("quality_foods"))
         {
-            List<ItemStack> inputs = new ArrayList<>(machine.items);
+            List<ItemStack> inputs = new ArrayList<>(machine.items.stream().map(MaybeStack::toStack).toList());
 
             //remove excluded outputs from items in machine
             inputs.removeIf(o -> excludedOutputs.contains(o.getItemHolder()));

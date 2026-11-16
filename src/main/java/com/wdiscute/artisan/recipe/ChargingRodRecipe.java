@@ -12,9 +12,9 @@ import java.util.List;
 
 public class ChargingRodRecipe extends AbstractArtisanRecipe
 {
-    public ChargingRodRecipe(List<Ingredient> ingredients, List<ChancedStack> result, int processing_days, List<Ingredient> requiredUpgrades, List<Ingredient> blacklistedUpgrades)
+    public ChargingRodRecipe(List<Ingredient> ingredients, List<ChancedStack> result, int processing_days, List<Ingredient> requiredUpgrades, int rank)
     {
-        super(ArtisanRecipeTypes.AGING_CASK.get(), ingredients, result, processing_days, requiredUpgrades, blacklistedUpgrades);
+        super(ArtisanRecipeTypes.AGING_CASK.get(), ingredients, result, processing_days, requiredUpgrades, rank);
     }
 
     @Override

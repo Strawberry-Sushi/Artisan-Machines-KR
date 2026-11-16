@@ -11,11 +11,10 @@
             {
               "chance": 1.0,
               "stack": {
-                "components": {
+                "data_components_patch": {
                   "minecraft:custom_name": "\"Battery\""
                 },
-                "count": 1,
-                "id": "minecraft:diamond"
+                "identifier": "minecraft:diamond"
               }
             }
           ]

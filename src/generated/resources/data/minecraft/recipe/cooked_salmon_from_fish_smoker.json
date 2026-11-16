@@ -1,0 +1,19 @@
+{
+  "type": "artisan_machines:fish_smoker",
+  "chanced_results": [
+    {
+      "chance": 1.0,
+      "stack": {
+        "identifier": "minecraft:cooked_salmon"
+      }
+    }
+  ],
+  "ingredients": [
+    {
+      "item": "minecraft:salmon"
+    }
+  ],
+  "processing_hours": 1,
+  "rank": 0,
+  "required_upgrades": []
+}

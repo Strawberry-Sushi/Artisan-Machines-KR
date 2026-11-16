@@ -3,12 +3,31 @@
   "creativetab.artisan_machines.artisan_machines.machines": "Machines",
   "creativetab.artisan_machines.artisan_machines.upgrades": "Upgrades",
 
+  "jemi.processing_time.hours" : "%s hours",
+  "jemi.processing_time.days" : "%s days",
+  "jemi.processing_time.days_hours" : "%sd, %sh",
+
+  "emi.category.artisan.loom" : "Looming",
+  "emi.category.artisan.aging_cask" : "Aginging Casking",
+  "emi.category.artisan.ancient_cask" : "Ancient Casking",
+  "emi.category.artisan.bait_maker" : "Bait Making",
+  "emi.category.artisan.cheese_press" : "Cheese Pressing",
+  "emi.category.artisan.crystalarium" : "Crystalariuminizationing",
+  "emi.category.artisan.dehydrator" : "Dehydration",
+  "emi.category.artisan.deluxe_worm_farm" : "Deluxe Worm Farming",
+  "emi.category.artisan.fish_smoker" : "Fish Smoking",
+  "emi.category.artisan.mayonnaise_machine" : "Mayonnaise Machining (MM for short)",
+  "emi.category.artisan.oil_maker" : "Oil Making",
+  "emi.category.artisan.preserves_jar" : "Preserving (in a jar)",
+  "emi.category.artisan.recycling_machine" : "Recycling",
+  "emi.category.artisan.wine_keg" : "Whining",
+  "emi.category.artisan.charging_rod" : "Rod Charging",
+
   "artisan_machines.configuration.bob" : "Machine Bob Multiplier",
   "artisan_machines.configuration.bob_upgrade" : "Upgraded Machine Bob Multiplier",
   "artisan_machines.configuration.tick_delay" : "Tick Delay",
 
-  "block.artisan_machines.machine.currently_making": "Currently Making: ",
-  "block.artisan_machines.machine.hours": " - %s hours left",
+  "block.artisan_machines.machine.currently_making": "Currently Making: %s %s",
 
   "block.artisan_machines.loom": "Loom",
   "block.artisan_machines.cheese_press": "Cheese Press",

@@ -1,0 +1,19 @@
+{
+  "type": "artisan_machines:ancient_cask",
+  "chanced_results": [
+    {
+      "chance": 1.0,
+      "stack": {
+        "identifier": "minecraft:dragon_breath"
+      }
+    }
+  ],
+  "ingredients": [
+    {
+      "item": "minecraft:sweet_berries"
+    }
+  ],
+  "processing_hours": 48,
+  "rank": 0,
+  "required_upgrades": []
+}

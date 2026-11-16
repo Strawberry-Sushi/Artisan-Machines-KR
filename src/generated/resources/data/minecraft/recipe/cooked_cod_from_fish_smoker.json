@@ -1,12 +1,10 @@
 {
   "type": "artisan_machines:fish_smoker",
-  "blacklisted_upgrades": [],
   "chanced_results": [
     {
       "chance": 1.0,
       "stack": {
-        "count": 1,
-        "id": "minecraft:cooked_cod"
+        "identifier": "minecraft:cooked_cod"
       }
     }
   ],
@@ -15,6 +13,7 @@
       "item": "minecraft:cod"
     }
   ],
-  "processing_hours": 8,
+  "processing_hours": 1,
+  "rank": 0,
   "required_upgrades": []
 }

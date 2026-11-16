@@ -10,28 +10,32 @@ import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public abstract class AbstractArtisanRecipe implements Recipe<ArtisanRecipeInput>
 {
-    RecipeType<?> type;
-    List<Ingredient> ingredients;
-    List<Ingredient> requiresUpgrade;
-    List<Ingredient> blacklistedUpgrades;
-    List<ChancedStack> result;
-    int processing_hours;
+    public static final Comparator<RecipeHolder<? extends AbstractArtisanRecipe>> RANK_ORDER =
+            (a, b) ->
+            {
+                int c = Integer.compare(b.value().rank, a.value().rank);
+                return c != 0 ? c : a.id().compareTo(b.id());
+            };
 
-    public AbstractArtisanRecipe(RecipeType<?> type, List<Ingredient> ingredients, List<ChancedStack> result, int processing_hours, List<Ingredient> requiredUpgrades, List<Ingredient> blacklistedUpgrades)
+    RecipeType<?> type;
+    public List<Ingredient> ingredients;
+    public List<Ingredient> requiresUpgrade;
+    public List<ChancedStack> result;
+    public int processing_hours;
+    public int rank;
+
+    public AbstractArtisanRecipe(RecipeType<?> type, List<Ingredient> ingredients, List<ChancedStack> result, int processing_hours, List<Ingredient> requiredUpgrades, int rank)
     {
         this.type = type;
         this.ingredients = ingredients;
         this.result = result;
         this.processing_hours = processing_hours;
         this.requiresUpgrade = requiredUpgrades;
-        this.blacklistedUpgrades = blacklistedUpgrades;
+        this.rank = rank;
     }
 
     @Override
@@ -56,7 +60,7 @@ public abstract class AbstractArtisanRecipe implements Recipe<ArtisanRecipeInput
     @Override
     public ItemStack assemble(ArtisanRecipeInput input, HolderLookup.Provider registries)
     {
-        return this.result.getFirst().stack();
+        return this.result.getFirst().stack().toStack();
     }
 
     @Override
@@ -76,22 +80,6 @@ public abstract class AbstractArtisanRecipe implements Recipe<ArtisanRecipeInput
         NonNullList<Ingredient> nonnulllist = NonNullList.create();
         nonnulllist.addAll(List.copyOf(this.ingredients));
         return nonnulllist;
-    }
-
-    public boolean hasBlacklistedUpgrade(List<ItemStack> upgrades)
-    {
-        if (blacklistedUpgrades.isEmpty()) return false;
-
-        for (ItemStack stack : upgrades)
-        {
-            if (stack.isEmpty()) continue;
-
-            for (Ingredient banned : blacklistedUpgrades)
-            {
-                if (banned.test(stack)) return true;
-            }
-        }
-        return false;
     }
 
     //Kuhn’s augmenting-path algorithm
@@ -138,7 +126,7 @@ public abstract class AbstractArtisanRecipe implements Recipe<ArtisanRecipeInput
     @Override
     public ItemStack getResultItem(HolderLookup.Provider registries)
     {
-        return this.result.getFirst().stack();
+        return this.result.getFirst().stack().toStack();
     }
 
     public List<ChancedStack> getResult()
@@ -154,6 +142,6 @@ public abstract class AbstractArtisanRecipe implements Recipe<ArtisanRecipeInput
 
     public interface Factory<T extends AbstractArtisanRecipe>
     {
-        T create(List<Ingredient> ingredients, List<ChancedStack> result, int processing_hours, List<Ingredient> requiredUpgrades, List<Ingredient> blacklistedUpgrades);
+        T create(List<Ingredient> ingredients, List<ChancedStack> result, int processing_hours, List<Ingredient> requiredUpgrades, int rank);
     }
 }

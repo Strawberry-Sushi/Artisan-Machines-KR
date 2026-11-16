@@ -1,12 +1,10 @@
 {
   "type": "artisan_machines:deluxe_worm_farm",
-  "blacklisted_upgrades": [],
   "chanced_results": [
     {
       "chance": 1.0,
       "stack": {
-        "count": 1,
-        "id": "minecraft:slime_ball"
+        "identifier": "minecraft:slime_ball"
       }
     }
   ],
@@ -16,5 +14,6 @@
     }
   ],
   "processing_hours": 4,
+  "rank": 0,
   "required_upgrades": []
 }

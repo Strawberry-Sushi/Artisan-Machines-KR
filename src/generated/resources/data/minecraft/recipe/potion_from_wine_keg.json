@@ -1,17 +1,15 @@
 {
   "type": "artisan_machines:wine_keg",
-  "blacklisted_upgrades": [],
   "chanced_results": [
     {
       "chance": 1.0,
       "stack": {
-        "components": {
+        "data_components_patch": {
           "minecraft:potion_contents": {
             "potion": "minecraft:water"
           }
         },
-        "count": 1,
-        "id": "minecraft:potion"
+        "identifier": "minecraft:potion"
       }
     }
   ],
@@ -21,5 +19,6 @@
     }
   ],
   "processing_hours": 8,
+  "rank": 0,
   "required_upgrades": []
 }

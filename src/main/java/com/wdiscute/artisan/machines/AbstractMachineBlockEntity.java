@@ -1,19 +1,18 @@
 package com.wdiscute.artisan.machines;
 
+import com.mojang.serialization.Codec;
 import com.wdiscute.artisan.ArtisanConfig;
 import com.wdiscute.artisan.ChancedStack;
 import com.wdiscute.artisan.recipe.AbstractArtisanRecipe;
-import com.wdiscute.artisan.recipe.ArtisanRecipeInput;
 import com.wdiscute.artisan.registry.ArtisanDataMaps;
 import com.wdiscute.artisan.upgrades.AbstractUpgrade;
-import com.wdiscute.artisan.upgrades.MachineSettings;
 import com.wdiscute.artisan.upgrades.MachineUpgrade;
+import com.wdiscute.utils.MaybeStack;
+import com.wdiscute.utils.ValueHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -22,11 +21,11 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,9 +37,10 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity
     public int tickOffset = -1;
     public long lastTickHour = -1;
     public int hoursRemaining = -1;
+
+    public List<MaybeStack> upgrades = new ArrayList<>();
+    public List<MaybeStack> items = new ArrayList<>();
     public List<ChancedStack> recipeResult = List.of();
-    public List<ItemStack> items = new ArrayList<>();
-    public List<ItemStack> upgrades = new ArrayList<>();
 
     public AbstractMachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState)
     {
@@ -66,34 +66,33 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity
 
     public void putItem(ItemStack itemStack)
     {
-        items.add(itemStack.copyWithCount(1));
-        setChanged();
+        items.add(new MaybeStack(itemStack.copyWithCount(1)));
+        sync();
     }
 
     public void putUpgrade(ItemStack itemStack, MachineUpgrade machineUpgrade)
     {
-        upgrades.add(itemStack.copyWithCount(1));
+        upgrades.add(new MaybeStack(itemStack.copyWithCount(1)));
+        invalidateUpgradeCache();
         machineUpgrade.upgrades().forEach(o -> o.onAdd(this));
-        setChanged();
+        sync();
     }
 
-    private List<AbstractUpgrade> upgradesCache;
-    private List<ItemStack> upgradeItemsCache;
+
+    private @Nullable List<AbstractUpgrade> upgradesCache;
+
+    public void invalidateUpgradeCache() { upgradesCache = null; }
 
     public List<AbstractUpgrade> getUpgrades()
     {
-        if (upgradesCache != null && upgradeItemsCache == upgrades) return upgradesCache;
-        //gets every upgrade from the items stored using the datamap
-        List<List<AbstractUpgrade>> list = upgrades.stream().map(o -> ArtisanDataMaps.getOrDefault(o).upgrades()).toList();
-        List<AbstractUpgrade> upgrades = new ArrayList<>();
-        list.forEach(upgrades::addAll);
-
-        MachineSettings machineSettings = ArtisanDataMaps.getOrDefault(this);
-        upgrades.addAll(machineSettings.baseUpgrades());
-
-        upgradeItemsCache = List.copyOf(this.upgrades);
-        upgradesCache = upgrades;
-        return upgrades;
+        if (upgradesCache == null)
+        {
+            List<AbstractUpgrade> list = new ArrayList<>(ArtisanDataMaps.getOrDefault(this).baseUpgrades());
+            for (MaybeStack stack : upgrades)
+                list.addAll(ArtisanDataMaps.getOrDefault(stack.toStack()).upgrades());
+            upgradesCache = List.copyOf(list);
+        }
+        return upgradesCache;
     }
 
     public List<ItemStack> getHarvestResults()
@@ -102,7 +101,7 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity
 
         for (ChancedStack chancedStack : recipeResult)
             if (level.getRandom().nextFloat() < chancedStack.chance())
-                results.add(chancedStack.stack());
+                results.add(chancedStack.stack().toStack());
 
         for (AbstractUpgrade upgrade : getUpgrades())
             results = upgrade.modifyHarvestResult(this, results);
@@ -110,9 +109,10 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity
         return results;
     }
 
-    public void harvest(Level level)
+    public void harvest(List<AbstractUpgrade> playerUpgrades)
     {
         getUpgrades().forEach(o -> o.onHarvest(this));
+        playerUpgrades.forEach(o -> o.onHarvest(this));
 
         //spawn items
         getHarvestResults().forEach(o ->
@@ -129,24 +129,31 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity
         hoursRemaining = -1;
 
         //set back to idle
-        level.setBlockAndUpdate(getBlockPos(), level.getBlockState(worldPosition).setValue(AbstractMachineBlock.STATE, AbstractMachineBlock.State.IDLE));
-        setChanged();
+        level.setBlockAndUpdate(worldPosition, getBlockState().setValue(AbstractMachineBlock.STATE, AbstractMachineBlock.State.IDLE));
         getUpgrades().forEach(o -> o.onFinishedHarvest(this));
+        sync();
     }
 
     public void startRecipe(AbstractArtisanRecipe recipe)
     {
         recipeResult = recipe.getResult();
-        level.setBlockAndUpdate(worldPosition, getBlockState().setValue(AbstractMachineBlock.STATE, AbstractMachineBlock.State.WORKING));
         //+1 as a recipe put 1 second before daily reset shouldn't be finished
         hoursRemaining = recipe.getHours() + 1;
         lastTickHour = -1;
+        level.setBlockAndUpdate(worldPosition, getBlockState().setValue(AbstractMachineBlock.STATE, AbstractMachineBlock.State.WORKING));
         getUpgrades().forEach(o -> o.onRecipeStarted(recipe, this));
 
-        setChanged();
+        sync();
     }
 
-    public List<ItemStack> getItems()
+    public void sync()
+    {
+        setChanged();
+        if (level != null)
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);
+    }
+
+    public List<MaybeStack> getItems()
     {
         return items;
     }
@@ -171,21 +178,21 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity
      */
     public void hourlyTick(long hour, BlockState state)
     {
-        getUpgrades().forEach(o -> o.onHourlyTick(this, hour));
-
         if (lastTickHour == -1)
             lastTickHour = hour;
         else
             lastTickHour++;
+
+        getUpgrades().forEach(o -> o.onHourlyTick(this, lastTickHour));
 
         //if working
         if (state.getValue(AbstractMachineBlock.STATE).equals(AbstractMachineBlock.State.WORKING))
             hoursRemaining--;
 
         //if recipe finished
-        if (hoursRemaining == 0)
+        if (state.getValue(AbstractMachineBlock.STATE).equals(AbstractMachineBlock.State.WORKING) && hoursRemaining <= 0)
         {
-            if(level instanceof ServerLevel sl)
+            if (level instanceof ServerLevel sl)
             {
                 BlockPos pos = getBlockPos();
                 sl.sendParticles(ParticleTypes.ASH, pos.getX() + 0.5f, pos.getY(), pos.getZ() + 0.5f,
@@ -195,104 +202,33 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity
             level.setBlockAndUpdate(worldPosition, state.setValue(AbstractMachineBlock.STATE, AbstractMachineBlock.State.HARVESTABLE));
         }
 
-        setChanged();
+        sync();
     }
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.saveAdditional(tag, registries);
-        tag.putLong("last_tick_hour", lastTickHour);
-        tag.putInt("hours_remaining", hoursRemaining);
+        ValueHelper.store("last_tick_hour", Codec.LONG, lastTickHour, tag);
+        ValueHelper.store("hours_remaining", Codec.INT, hoursRemaining, tag);
 
-        //save items
-        {
-            ListTag itemsTag = new ListTag();
-            for (ItemStack itemstack : this.items)
-            {
-                if (!itemstack.isEmpty())
-                {
-                    CompoundTag compoundtag = new CompoundTag();
-                    itemsTag.add(itemstack.save(registries, compoundtag));
-                }
-            }
-            tag.put("result", itemsTag);
-        }
-
-        //save result
-        {
-            ListTag resultTag = new ListTag();
-            for (ChancedStack chancedStack : this.recipeResult)
-            {
-                if (!chancedStack.stack().isEmpty())
-                {
-                    CompoundTag compoundtag = new CompoundTag();
-                    compoundtag.putFloat("chance", chancedStack.chance());
-                    resultTag.add(chancedStack.stack().save(registries, compoundtag));
-                }
-            }
-            tag.put("result", resultTag);
-        }
-
-        //save upgrades
-        {
-            ListTag upgrades = new ListTag();
-            for (ItemStack itemstack : this.upgrades)
-            {
-                if (!itemstack.isEmpty())
-                {
-                    CompoundTag compoundtag = new CompoundTag();
-                    upgrades.add(itemstack.save(registries, compoundtag));
-                }
-            }
-            tag.put("upgrades", upgrades);
-        }
-
+        ValueHelper.store("upgrades", MaybeStack.CODEC.listOf(), upgrades, tag);
+        ValueHelper.store("items", MaybeStack.CODEC.listOf(), items, tag);
+        ValueHelper.store("result", ChancedStack.CODEC.listOf(), recipeResult, tag);
     }
-
 
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.loadAdditional(tag, registries);
-        lastTickHour = tag.getLong("last_tick_hour");
-        hoursRemaining = tag.getInt("hours_remaining");
+        lastTickHour =  ValueHelper.read("last_tick_hour", Codec.LONG, tag).orElse(-1L);
+        hoursRemaining = ValueHelper.read("hours_remaining", Codec.INT, tag).orElse(-1);
 
-        //load items
-        {
-            items.clear();
-            ListTag itemsTag = tag.getList("items", 10);
-            for (int i = 0; i < itemsTag.size(); i++)
-            {
-                CompoundTag compoundtag = itemsTag.getCompound(i);
-                this.items.add(ItemStack.parse(registries, compoundtag).orElse(ItemStack.EMPTY));
-            }
-        }
-
-        //load result
-        {
-            recipeResult = new ArrayList<>();
-            ListTag itemsTag = tag.getList("result", 10);
-            for (int i = 0; i < itemsTag.size(); i++)
-            {
-                CompoundTag compoundtag = itemsTag.getCompound(i);
-                float chance = compoundtag.getFloat("chance");
-                this.recipeResult.add(new ChancedStack(ItemStack.parse(registries, compoundtag).orElse(ItemStack.EMPTY), chance));
-            }
-        }
-
-        //load upgrades
-        {
-            upgrades.clear();
-            ListTag upgradesTag = tag.getList("upgrades", 10);
-            for (int i = 0; i < upgradesTag.size(); i++)
-            {
-                CompoundTag compoundtag = upgradesTag.getCompound(i);
-                this.upgrades.add(ItemStack.parse(registries, compoundtag).orElse(ItemStack.EMPTY));
-            }
-        }
+        upgrades = new ArrayList<>(ValueHelper.read("upgrades", MaybeStack.CODEC.listOf(), tag).orElse(List.of()));
+        invalidateUpgradeCache();
+        items = new ArrayList<>(ValueHelper.read("items", MaybeStack.CODEC.listOf(), tag).orElse(List.of()));
+        recipeResult = new ArrayList<>(ValueHelper.read("result", ChancedStack.CODEC.listOf(), tag).orElse(List.of()));
     }
-
 
     @Override
     public @Nullable Packet<ClientGamePacketListener> getUpdatePacket()
@@ -301,26 +237,24 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity
     }
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider lookupProvider)
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries)
     {
-        super.onDataPacket(net, pkt, lookupProvider);
-        loadAdditional(pkt.getTag(), lookupProvider);
+        return saveWithoutMetadata(registries);
     }
 
     private int getTickOffset(Level level)
     {
         if (tickOffset != -1) return tickOffset;
         tickOffset = level.getRandom().nextInt(ArtisanConfig.TICK_DELAY.get());
-        setChanged();
         return tickOffset;
     }
 
-    public static <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state)
+    public static <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level l)
     {
         //don't tick on client
-        if (level.isClientSide) return null;
+        if (l.isClientSide) return null;
 
-        return (level0, pos0, state0, blockEntity) ->
+        return (level, pos, state, blockEntity) ->
         {
             AbstractMachineBlockEntity adbe = ((AbstractMachineBlockEntity) blockEntity);
 
@@ -328,11 +262,16 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity
             if (state.getValue(AbstractMachineBlock.STATE).equals(AbstractMachineBlock.State.WORKING) || adbe.shouldTickNonWorking())
             {
                 //tick with offset
-                if ((level.getGameTime() + adbe.getTickOffset(level)) % ArtisanConfig.TICK_DELAY.get() == 0)
+                int tickOffset = adbe.getTickOffset(level);
+                if ((level.getDayTime() + tickOffset) % ArtisanConfig.TICK_DELAY.get() == 0)
                     adbe.tick();
 
                 //daily tick
-                long hour = (level.getGameTime() + adbe.getTickOffset(level)) / 1000;
+                long hour = (level.getDayTime() + tickOffset) / 1000;
+
+                if (adbe.lastTickHour > hour)
+                    adbe.lastTickHour = hour;
+
                 if (adbe.lastTickHour < hour)
                     adbe.hourlyTick(hour, state);
             }

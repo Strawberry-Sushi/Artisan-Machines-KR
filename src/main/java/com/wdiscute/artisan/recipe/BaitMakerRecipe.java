@@ -13,9 +13,9 @@ import java.util.List;
 
 public class BaitMakerRecipe extends AbstractArtisanRecipe
 {
-    public BaitMakerRecipe(List<Ingredient> ingredients, List<ChancedStack> result, int processing_hours, List<Ingredient> requiredUpgrades, List<Ingredient> blacklistedUpgrades)
+    public BaitMakerRecipe(List<Ingredient> ingredients, List<ChancedStack> result, int processing_hours, List<Ingredient> requiredUpgrades, int rank)
     {
-        super(ArtisanRecipeTypes.BAIT_MAKER.get(), ingredients, result, processing_hours, requiredUpgrades, blacklistedUpgrades);
+        super(ArtisanRecipeTypes.BAIT_MAKER.get(), ingredients, result, processing_hours, requiredUpgrades, rank);
     }
 
     @Override

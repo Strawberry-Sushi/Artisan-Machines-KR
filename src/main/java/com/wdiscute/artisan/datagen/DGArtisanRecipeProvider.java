@@ -3,16 +3,22 @@ package com.wdiscute.artisan.datagen;
 import com.wdiscute.artisan.ChancedStack;
 import com.wdiscute.artisan.recipe.*;
 import com.wdiscute.artisan.registry.ArtisanItems;
+import com.wdiscute.utils.MaybeStack;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.crafting.Ingredient;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -65,11 +71,22 @@ public class DGArtisanRecipeProvider extends RecipeProvider
                 .save(output);
 
         //aging cask
+        ItemStack agingCask = new ItemStack(Items.SWEET_BERRIES);
+        FoodProperties food = new FoodProperties.Builder()
+                .nutrition(4)
+                .saturationModifier(0.3f)
+                .effect(new MobEffectInstance(MobEffects.REGENERATION, 1000, 0), 1.0f)
+                .build();
+        agingCask.set(DataComponents.FOOD, food);
+        agingCask.set(DataComponents.RARITY, Rarity.UNCOMMON);
+        agingCask.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
+
         new ArtisanRecipeBuilder(
-                Items.SPLASH_POTION.getDefaultInstance(),
+                agingCask,
                 AgingCaskRecipe::new,
-                48,
-                Ingredient.of(Items.SWEET_BERRIES)
+                40,
+                Ingredient.of(Items.SWEET_BERRIES),
+                Ingredient.of(Items.SUGAR)
         )
                 .group("aging_cask")
                 .unlockedBy("has_grapes", has(Items.SWEET_BERRIES))
@@ -77,11 +94,9 @@ public class DGArtisanRecipeProvider extends RecipeProvider
 
         //ancient cask
         new ArtisanRecipeBuilder(
-                Items.LINGERING_POTION.getDefaultInstance(),
+                Items.DRAGON_BREATH.getDefaultInstance(),
                 AncientCaskRecipe::new,
-                8,
-                List.of(),
-                List.of(Ingredient.of(ArtisanItems.INSERTER)),
+                48,
                 Ingredient.of(Items.SWEET_BERRIES)
         )
                 .group("ancient_cask")
@@ -91,15 +106,14 @@ public class DGArtisanRecipeProvider extends RecipeProvider
         //ancient cask - upgraded
         new ArtisanRecipeBuilder(
                 List.of(
-                        new ChancedStack(Items.LINGERING_POTION.getDefaultInstance(), 1),
-                        new ChancedStack(Items.LINGERING_POTION.getDefaultInstance(), 1),
-                        new ChancedStack(Items.LINGERING_POTION.getDefaultInstance(), 1),
-                        new ChancedStack(Items.LINGERING_POTION.getDefaultInstance(), 1)
+                        new ChancedStack(new MaybeStack(Items.DRAGON_BREATH)),
+                        new ChancedStack(new MaybeStack(Items.DRAGON_BREATH)),
+                        new ChancedStack(new MaybeStack(Items.DRAGON_BREATH)),
+                        new ChancedStack(new MaybeStack(Items.DRAGON_BREATH))
                 ),
                 AncientCaskRecipe::new,
-                8,
+                48,
                 List.of(Ingredient.of(ArtisanItems.INSERTER)),
-                List.of(),
                 Ingredient.of(Items.SWEET_BERRIES)
         )
                 .group("ancient_cask")
@@ -119,6 +133,18 @@ public class DGArtisanRecipeProvider extends RecipeProvider
                 .unlockedBy("has_diamond", has(Items.DIAMOND))
                 .save(output);
 
+        ItemStack crystalarium2 = Items.EMERALD.getDefaultInstance();
+        crystalarium2.setCount(2);
+        new ArtisanRecipeBuilder(
+                crystalarium2,
+                CrystalariumRecipe::new,
+                8,
+                Ingredient.of(Items.EMERALD)
+        )
+                .group("crystalarium")
+                .unlockedBy("has_emerald", has(Items.EMERALD))
+                .save(output);
+
         //deluxe worm farm
         new ArtisanRecipeBuilder(
                 Items.SLIME_BALL.getDefaultInstance(),
@@ -134,19 +160,27 @@ public class DGArtisanRecipeProvider extends RecipeProvider
         new ArtisanRecipeBuilder(
                 Items.COOKED_COD.getDefaultInstance(),
                 FishSmokerRecipe::new,
-                8,
+                1,
                 Ingredient.of(Items.COD)
         )
                 .group("fish_smoker")
                 .unlockedBy("has_cod", has(Items.COD))
                 .save(output);
 
+        new ArtisanRecipeBuilder(
+                Items.COOKED_SALMON.getDefaultInstance(),
+                FishSmokerRecipe::new,
+                1,
+                Ingredient.of(Items.SALMON)
+        )
+                .group("fish_smoker")
+                .unlockedBy("has_salmon", has(Items.SALMON))
+                .save(output);
+
 
         //dehydrator
         new ArtisanRecipeBuilder(
-                List.of(
-                        new ChancedStack(Items.HAY_BLOCK.getDefaultInstance(), 1)
-                ),
+                Items.HAY_BLOCK.getDefaultInstance(),
                 DehydratorRecipe::new,
                 8,
                 Ingredient.of(ItemTags.VILLAGER_PLANTABLE_SEEDS),
@@ -166,8 +200,8 @@ public class DGArtisanRecipeProvider extends RecipeProvider
         //dehydrator upgraded
         new ArtisanRecipeBuilder(
                 List.of(
-                        new ChancedStack(Items.HAY_BLOCK.getDefaultInstance(), 1),
-                        new ChancedStack(Items.HAY_BLOCK.getDefaultInstance(), 1)
+                        new ChancedStack(new MaybeStack(Items.HAY_BLOCK)),
+                        new ChancedStack(new MaybeStack(Items.HAY_BLOCK))
                 ),
                 DehydratorRecipe::new,
                 8,
@@ -186,8 +220,8 @@ public class DGArtisanRecipeProvider extends RecipeProvider
                 .save(output, "upgraded");
 
         //mayonnaise machine
-        ItemStack mayo = Items.WHITE_CARPET.getDefaultInstance();
-        mayo.set(DataComponents.CUSTOM_NAME, Component.literal("Mayo"));
+        ItemStack mayo = Items.MILK_BUCKET.getDefaultInstance();
+        mayo.set(DataComponents.ITEM_NAME, Component.literal("Mayo (for real)"));
         new ArtisanRecipeBuilder(
                 mayo,
                 MayonnaiseMachineRecipe::new,
@@ -204,7 +238,6 @@ public class DGArtisanRecipeProvider extends RecipeProvider
                 PreservesJarRecipe::new,
                 2,
                 List.of(),
-                List.of(Ingredient.of(ArtisanItems.STONE_HAND)),
                 Ingredient.of(Items.CACTUS),
                 Ingredient.of(Items.CACTUS),
                 Ingredient.of(Items.CACTUS),
@@ -220,7 +253,6 @@ public class DGArtisanRecipeProvider extends RecipeProvider
                 PreservesJarRecipe::new,
                 2,
                 List.of(Ingredient.of(ArtisanItems.STONE_HAND)),
-                List.of(),
                 Ingredient.of(Items.CACTUS),
                 Ingredient.of(Items.CACTUS)
         )
@@ -246,12 +278,12 @@ public class DGArtisanRecipeProvider extends RecipeProvider
         //recycling machine
         new ArtisanRecipeBuilder(
                 List.of(
-                        new ChancedStack(Items.RAW_COPPER.getDefaultInstance(), 0.3f),
-                        new ChancedStack(Items.RAW_IRON.getDefaultInstance(), 0.1f),
-                        new ChancedStack(Items.LAPIS_LAZULI.getDefaultInstance(), 0.1f),
-                        new ChancedStack(Items.DIAMOND.getDefaultInstance(), 0.01f),
-                        new ChancedStack(Items.COBBLESTONE.getDefaultInstance(), 0.7f),
-                        new ChancedStack(Items.DEEPSLATE.getDefaultInstance(), 0.6f)
+                        new ChancedStack(new MaybeStack(Items.RAW_COPPER), 0.3f),
+                        new ChancedStack(new MaybeStack(Items.RAW_IRON), 0.1f),
+                        new ChancedStack(new MaybeStack(Items.LAPIS_LAZULI), 0.1f),
+                        new ChancedStack(new MaybeStack(Items.DIAMOND), 0.01f),
+                        new ChancedStack(new MaybeStack(Items.COBBLESTONE), 0.7f),
+                        new ChancedStack(new MaybeStack(Items.DEEPSLATE), 0.6f)
                 ),
                 RecyclingMachineRecipe::new,
                 2,
@@ -267,7 +299,7 @@ public class DGArtisanRecipeProvider extends RecipeProvider
 
         //bait maker
         new ArtisanRecipeBuilder(
-                Items.BONE.getDefaultInstance(),
+                List.of(new ChancedStack(new MaybeStack(Items.BONE, 3))),
                 BaitMakerRecipe::new,
                 2,
                 Ingredient.of(Items.SALMON)
@@ -277,16 +309,16 @@ public class DGArtisanRecipeProvider extends RecipeProvider
                 .save(output);
 
         //oil maker
-        ItemStack oil = Items.BLACK_CANDLE.getDefaultInstance();
-        oil.set(DataComponents.CUSTOM_NAME, Component.literal("Oil"));
+        ItemStack oil = Items.HONEY_BOTTLE.getDefaultInstance();
+        oil.set(DataComponents.ITEM_NAME, Component.literal("Sunflower Oil"));
         new ArtisanRecipeBuilder(
                 oil,
                 OilMakerRecipe::new,
                 2,
-                Ingredient.of(Items.TROPICAL_FISH)
+                Ingredient.of(Items.SUNFLOWER)
         )
                 .group("oil_maker")
-                .unlockedBy("has_tropical_fish", has(Items.TROPICAL_FISH))
+                .unlockedBy("has_sunflower", has(Items.SUNFLOWER))
                 .save(output);
 
 

@@ -13,9 +13,9 @@ import java.util.List;
 
 public class SeedMakerRecipe extends AbstractArtisanRecipe
 {
-    public SeedMakerRecipe(List<Ingredient> ingredients, List<ChancedStack> result, int processing_hours, List<Ingredient> requiredUpgrades, List<Ingredient> blacklistedUpgrades)
+    public SeedMakerRecipe(List<Ingredient> ingredients, List<ChancedStack> result, int processing_hours, List<Ingredient> requiredUpgrades, int rank)
     {
-        super(ArtisanRecipeTypes.SEED_MAKER.get(), ingredients, result, processing_hours, requiredUpgrades, blacklistedUpgrades);
+        super(ArtisanRecipeTypes.SEED_MAKER.get(), ingredients, result, processing_hours, requiredUpgrades, rank);
     }
 
     @Override

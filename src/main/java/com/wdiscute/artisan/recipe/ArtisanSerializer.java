@@ -24,7 +24,7 @@ public class ArtisanSerializer<T extends AbstractArtisanRecipe> implements Recip
                                 ChancedStack.CODEC.listOf().fieldOf("chanced_results").forGetter(recipe -> recipe.result),
                                 Codec.INT.fieldOf("processing_hours").forGetter(recipe -> recipe.processing_hours),
                                 Ingredient.LIST_CODEC.fieldOf("required_upgrades").forGetter(recipe -> recipe.requiresUpgrade),
-                                Ingredient.LIST_CODEC.fieldOf("blacklisted_upgrades").forGetter(recipe -> recipe.blacklistedUpgrades)
+                                Codec.INT.fieldOf("rank").forGetter(recipe -> recipe.rank)
                         )
                         .apply(instance, factory::create)
         );
@@ -34,7 +34,7 @@ public class ArtisanSerializer<T extends AbstractArtisanRecipe> implements Recip
                 ChancedStack.LIST_STREAM_CODEC, o -> o.result,
                 ByteBufCodecs.INT, o -> o.processing_hours,
                 Ingredient.CONTENTS_STREAM_CODEC.apply(ByteBufCodecs.list()), o -> o.requiresUpgrade,
-                Ingredient.CONTENTS_STREAM_CODEC.apply(ByteBufCodecs.list()), o -> o.blacklistedUpgrades,
+                ByteBufCodecs.INT, o -> o.rank,
                 factory::create
         );
     }

@@ -1,15 +1,13 @@
 {
   "type": "artisan_machines:mayonnaise_machine",
-  "blacklisted_upgrades": [],
   "chanced_results": [
     {
       "chance": 1.0,
       "stack": {
-        "components": {
-          "minecraft:custom_name": "\"Mayo\""
+        "data_components_patch": {
+          "minecraft:item_name": "\"Mayo (for real)\""
         },
-        "count": 1,
-        "id": "minecraft:white_carpet"
+        "identifier": "minecraft:milk_bucket"
       }
     }
   ],
@@ -19,5 +17,6 @@
     }
   ],
   "processing_hours": 4,
+  "rank": 0,
   "required_upgrades": []
 }
