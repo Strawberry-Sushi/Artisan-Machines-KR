@@ -29,8 +29,8 @@ public class MachineBlockRenderer implements BlockEntityRenderer<AbstractMachine
     public static float[] squish(Level level, BlockPos pos, float partialTick, boolean upgraded)
     {
         double intensity = upgraded ? ArtisanConfig.BOB_AMOUNT_UPGRADED.get() : ArtisanConfig.BOB_AMOUNT.get();
-        float time = level.getGameTime() + partialTick + pos.hashCode();
-        float s = Mth.sin(time * 0.3f);
+        double angle = ((level.getGameTime() + (double) partialTick) + pos.getX() + pos.getZ()) * 0.3;
+        float s = Mth.sin((float) (angle % (Math.PI * 2)));
         float sy = (float) (1f + s * 0.1f * intensity);
         float sxz = 1f / Mth.sqrt(sy);
         float hop = (float) (Math.max(0f, s) * 0.05f * intensity);
@@ -52,6 +52,7 @@ public class MachineBlockRenderer implements BlockEntityRenderer<AbstractMachine
         if (blockEntity.isWorking())
         {
             float[] a = squish(level, pos, partialTick, !blockEntity.upgrades.isEmpty());
+            System.out.println(a[0] + " - " + a[1] + " - " + a[2]);
             poseStack.translate(0.5, a[2], 0.5);
             poseStack.scale(a[0], a[1], a[0]);
             poseStack.translate(-0.5, 0, -0.5);
